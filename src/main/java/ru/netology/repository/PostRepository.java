@@ -1,55 +1,42 @@
 package ru.netology.repository;
 
-import ru.netology.exception.NotFoundException;
 import ru.netology.model.Post;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Optional;
-import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class PostRepository {
-  private final List<Post> allPosts;
-  private long idCounter;
+  private final ConcurrentMap<Long, Post> allPosts;
+  private final AtomicLong idCounter = new AtomicLong();
 
   public PostRepository() {
-    this.allPosts = new Vector<>();
-    idCounter = 0;
+    this.allPosts = new ConcurrentHashMap<>();
   }
 
-    public List<Post> all() {
-      return allPosts;
+    public Collection<Post> all() {
+      return allPosts.values();
     }
 
     public Optional<Post> getById(long id) {
-
-      for (Post post : allPosts) {
-        if (id == post.getId()) {
-          return Optional.of(post);
-        }
-      }
-      return Optional.empty();
+      return Optional.of(allPosts.get(id));
     }
 
   public Post save(Post savePost) {
-    long idSavePost = savePost.getId();
-
-    if (idSavePost == 0) {
-      savePost.setId(++idCounter);
-      allPosts.add(savePost);
-      return savePost;
-    } else {
-      Optional<Post> newPost = getById(idSavePost);
-      if (newPost.isPresent()) {
-        Post post = newPost.get();
-        post.setContent(savePost.getContent());
-        return post;
-      } else {
-        throw new NotFoundException(String.format("Пост с ID = %d невозможно сохранить!", idSavePost));
-      }
+    if (savePost.getId() == 0) {
+      long id = idCounter.incrementAndGet();
+      savePost.setId(id);
+      allPosts.put(id,savePost);
+    } else if (savePost.getId() != 0) {
+      Long currentId = savePost.getId();
+      allPosts.put(currentId, savePost);
     }
+    return savePost;
   }
 
   public void removeById(long id) {
-    allPosts.removeIf(post -> id == post.getId());
+    allPosts.remove(id);
   }
 }
