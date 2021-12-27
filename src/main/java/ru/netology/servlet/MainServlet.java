@@ -52,7 +52,7 @@ public class MainServlet extends HttpServlet {
   }
 
   private long parseId(String path) {
-    return Long.parseLong(path.substring(path.lastIndexOf(STR)));
+    return Long.parseLong(path.substring(path.lastIndexOf(STR) + 1));
   }
 }
 
