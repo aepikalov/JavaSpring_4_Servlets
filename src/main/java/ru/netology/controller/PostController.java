@@ -25,15 +25,10 @@ public class PostController {
     response.getWriter().print(gson.toJson(data));
   }
 
-  public void getById(long id, HttpServletResponse response) throws IOException {
+  public void getById(long id, HttpServletResponse response) throws IOException, NotFoundException {
     response.setContentType(APPLICATION_JSON);
-    try {
-      final var post = service.getById(id);
-      response.getWriter().print(gson.toJson(post));
-    } catch (NotFoundException e) {
-      e.printStackTrace();
-      response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-    }
+    final var post = service.getById(id);
+    response.getWriter().print(gson.toJson(post));
   }
 
   public void save(Reader body, HttpServletResponse response) throws IOException {
